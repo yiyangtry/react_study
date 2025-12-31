@@ -20,7 +20,7 @@ const Architecture = () => {
         <div className="max-w-7xl mx-auto flex items-center gap-3">
           <Map className="text-emerald-400" size={24} />
           <h1 className="text-xl font-bold tracking-wide">
-            Elasticsearch <span className="text-emerald-400">宏观架构图</span>
+            Elasticsearch <span className="text-emerald-400">架构图</span>
           </h1>
         </div>
       </nav>

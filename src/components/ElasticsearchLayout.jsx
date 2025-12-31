@@ -13,7 +13,8 @@ import {
   FileText,
   ChevronDown,
   ChevronRight,
-  Map
+  Map,
+  ZoomIn
 } from 'lucide-react';
 
 const ElasticsearchLayout = () => {
@@ -55,8 +56,13 @@ const ElasticsearchLayout = () => {
       children: [
         {
           path: '/elasticsearch/principles/architecture',
-          label: 'ES 宏观架构',
+          label: 'ES 架构',
           icon: Map
+        },
+        {
+          path: '/elasticsearch/principles/architecture-hierarchy',
+          label: 'ES 架构层次图',
+          icon: ZoomIn
         },
         {
           path: '/elasticsearch/principles/segment',
