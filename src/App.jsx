@@ -6,7 +6,6 @@ import ElasticsearchLayout from './components/ElasticsearchLayout';
 import ElasticsearchIndex from './pages/elasticsearch/ElasticsearchIndex';
 import ShardDistribution from './pages/elasticsearch/ShardDistribution';
 import PrinciplesIndex from './pages/elasticsearch/principles/PrinciplesIndex';
-import Architecture from './pages/elasticsearch/principles/Architecture';
 import ArchitectureHierarchy from './pages/elasticsearch/principles/ArchitectureHierarchy';
 import Segment from './pages/elasticsearch/principles/Segment';
 import RocketMQLayout from './components/RocketMQLayout';
@@ -21,7 +20,7 @@ const App = () => {
           <Route index element={<ElasticsearchIndex />} />
           <Route path="shard-distribution" element={<ShardDistribution />} />
           <Route path="principles" element={<PrinciplesIndex />} />
-          <Route path="principles/architecture" element={<Architecture />} />
+          <Route path="principles/architecture" element={<ArchitectureHierarchy />} />
           <Route path="principles/architecture-hierarchy" element={<ArchitectureHierarchy />} />
           <Route path="principles/segment" element={<Segment />} />
         </Route>

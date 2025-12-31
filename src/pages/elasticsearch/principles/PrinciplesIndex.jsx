@@ -9,26 +9,17 @@ import {
   Network,
   RefreshCw,
   ArrowRight,
-  Map,
   ZoomIn
 } from 'lucide-react';
 
 const PrinciplesIndex = () => {
   const topics = [
     {
-      id: 'architecture',
-      title: 'ES 宏观架构',
-      description: '理解 Elasticsearch 集群架构、节点角色、分片分布和整体设计',
-      icon: Map,
-      path: '/elasticsearch/principles/architecture',
-      available: true
-    },
-    {
       id: 'architecture-hierarchy',
-      title: 'ES 架构层次图',
-      description: '交互式探索从 Cluster 到 Segment 的完整架构层次，宏观到微观',
+      title: 'ES 架构全景图',
+      description: '交互式探索从 Cluster 到 Segment 的完整架构层次，物理层、逻辑层、底层核心',
       icon: ZoomIn,
-      path: '/elasticsearch/principles/architecture-hierarchy',
+      path: '/elasticsearch/principles/architecture',
       available: true
     },
     {
