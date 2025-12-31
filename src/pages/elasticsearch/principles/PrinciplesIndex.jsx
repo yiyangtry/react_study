@@ -23,6 +23,14 @@ const PrinciplesIndex = () => {
       available: true
     },
     {
+      id: 'index-principles',
+      title: '索引原理',
+      description: '深入理解索引的数据结构、映射配置、构建过程和查询机制',
+      icon: Database,
+      path: '/elasticsearch/principles/index-principles',
+      available: true
+    },
+    {
       id: 'segment',
       title: 'Segment 原理',
       description: '深入理解 Segment 的存储结构、创建机制和合并策略',
