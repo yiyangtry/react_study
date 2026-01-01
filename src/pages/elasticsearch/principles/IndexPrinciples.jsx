@@ -1,506 +1,293 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Database, Search, Layers, Zap, HardDrive, RefreshCcw, 
-  Settings, Terminal, Code, Filter, FastForward, Info, 
-  LayoutDashboard, Activity, Cpu, MousePointer2,
-  ChevronRight, ShieldCheck, BarChart3, AlertTriangle, PlayCircle,
-  Clock, Server, BookOpen, Recycle
-} from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Server, Database, AlertTriangle, CheckCircle, RefreshCw, Info } from 'lucide-react';
 
-const App = () => {
-  const [selectedTopic, setSelectedTopic] = useState('overview');
-  const [activeIndexId, setActiveIndexId] = useState('v1'); 
+const ClusterSimulator = () => {
+  // --- 核心状态 ---
+  const [nodeCount, setNodeCount] = useState(3);
+  const [primaryShards, setPrimaryShards] = useState(5);
+  const [replicas, setReplicas] = useState(1);
   
-  const [doc1, setDoc1] = useState("Elasticsearch is powerful");
-  const [doc2, setDoc2] = useState("Search is fast");
-  const [invertedIndex, setInvertedIndex] = useState({});
+  // 模拟集群状态
+  const [clusterState, setClusterState] = useState({
+    nodes: [],
+    unassigned: [],
+    status: 'green',
+    relocatingShards: [] // 记录哪些分片刚刚发生了移动
+  });
 
-  useEffect(() => {
-    const buildIndex = () => {
-      const index = {};
-      const process = (text, id) => {
-        text.toLowerCase().split(' ').forEach(word => {
-          if (!index[word]) index[word] = [];
-          if (!index[word].includes(id)) index[word].push(id);
+  // 上一次的分配映射，用于检测移动 { shardUniqueId: nodeId }
+  const prevAllocationRef = useRef({});
+
+  // --- 核心分配算法 (简化版 ES Logic) ---
+  const rebalanceCluster = () => {
+    const totalShards = [];
+    // 1. 生成所有分片对象
+    for (let i = 0; i < primaryShards; i++) {
+      // 主分片
+      totalShards.push({ 
+        id: i, 
+        type: 'p', 
+        uid: `p-${i}`, 
+        color: 'bg-blue-500 border-blue-600' 
+      });
+      // 副本分片
+      for (let r = 0; r < replicas; r++) {
+        totalShards.push({ 
+          id: i, 
+          type: 'r', 
+          uid: `r-${i}-${r}`, 
+          color: 'bg-slate-300 border-slate-400 text-slate-600' 
         });
-      };
-      process(doc1, "Doc_1");
-      process(doc2, "Doc_2");
-      setInvertedIndex(index);
-    };
-    buildIndex();
-  }, [doc1, doc2]);
-
-  const indexData = {
-    v1: {
-      name: "订单搜索场景 (v1)",
-      shards: [
-        { id: 0, type: 'Primary 主分片', segments: ['Large_Seg_01', 'Large_Seg_02'] },
-        { id: 1, type: 'Replica 副本', segments: ['Large_Seg_01', 'Large_Seg_02'] }
-      ],
-      desc: "【搜索优化例】订单索引经过 Force Merge 强制合并，段数量极少，查询速度最快。"
-    },
-    v2: {
-      name: "日志写入场景 (v2)",
-      shards: [
-        { id: 0, type: 'Primary 主分片', segments: ['Tiny_01', 'Tiny_02', 'Tiny_03', 'Tiny_04'] },
-        { id: 1, type: 'Primary 主分片', segments: ['Tiny_05', 'Tiny_06', 'Tiny_07', 'Tiny_08'] },
-        { id: 2, type: 'Replica 副本', segments: ['Tiny_01', 'Tiny_02', 'Tiny_03', 'Tiny_04'] }
-      ],
-      desc: "【高频写入例】日志正在疯狂写入，产生大量细碎段。此时应关注合并性能。"
-    }
-  };
-
-  const topics = [
-    { id: 'overview', title: '索引核心全景', subtitle: 'Learning Path', icon: <LayoutDashboard size={18}/>, color: 'text-blue-500' },
-    { id: 'engine', title: '透视倒排索引', subtitle: 'The Mechanics', icon: <Search size={18}/>, color: 'text-orange-500' },
-    { id: 'mapping', title: '手把手教建模', subtitle: 'Mapping Guide', icon: <Layers size={18}/>, color: 'text-purple-500' },
-    { id: 'production', title: '实战别名管理', subtitle: 'Ops Practice', icon: <Filter size={18}/>, color: 'text-emerald-500' },
-    { id: 'tuning', title: '榨干写入性能', subtitle: 'Performance', icon: <Zap size={18}/>, color: 'text-yellow-500' },
-    { id: 'reindex', title: '平滑索引迁移', subtitle: 'Data Migration', icon: <RefreshCcw size={18}/>, color: 'text-red-500' },
-  ];
-
-  return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
-      {/* 侧边导航栏 */}
-      <aside className="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col shadow-sm">
-        <div className="p-6 text-center">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            <BookOpen className="text-blue-600" size={24} />
-            <h1 className="font-black tracking-tighter text-lg uppercase leading-none text-slate-800 dark:text-white">ES 索引<br/>进阶实验室</h1>
-          </div>
-          <div className="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest border border-blue-100 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-900/20 rounded py-1 mt-2 tracking-tighter">从入门到精通教程</div>
-        </div>
-
-        <nav className="flex-1 px-4 space-y-1 overflow-y-auto mt-4">
-          {topics.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setSelectedTopic(t.id)}
-              className={`w-full group flex flex-col gap-0.5 px-4 py-3 rounded-xl transition-all ${
-                selectedTopic === t.id 
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20' 
-                : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <span className={selectedTopic === t.id ? 'text-white' : t.color}>{t.icon}</span>
-                <span className="text-sm font-bold tracking-tight">{t.title}</span>
-              </div>
-              <span className={`text-[9px] pl-7 opacity-70 font-medium font-mono uppercase ${selectedTopic === t.id ? 'text-blue-100' : ''}`}>
-                {t.subtitle}
-              </span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="p-6 mt-auto border-t border-slate-100 dark:border-slate-800 text-center">
-          <div className="flex items-center justify-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
-            <Activity size={14} className="text-green-500" /> 教学基准: V 7.10 OSS
-          </div>
-        </div>
-      </aside>
-
-      {/* 主内容区域 */}
-      <main className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-slate-50/50 dark:bg-slate-950/50">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-8 flex justify-between items-end">
-            <div>
-              <h2 className="text-3xl font-black tracking-tight text-slate-800 dark:text-white uppercase">{topics.find(t => t.id === selectedTopic).title}</h2>
-              <p className="text-slate-500 mt-1 font-medium">带你深入索引底层，掌握应对海量数据的实战技巧</p>
-            </div>
-            <div className="flex gap-2">
-              <span className="px-4 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] font-black rounded-full uppercase tracking-widest border border-blue-200 dark:border-blue-800">进阶必修</span>
-            </div>
-          </div>
-
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            
-            {/* 1. 索引全景看板 */}
-            {selectedTopic === 'overview' && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-12 grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <MetricCard title="分片配置" subtitle="Shard Plan" value="主副均衡" sub="分布式存储的核心" status="bg-green-500" />
-                  <MetricCard title="写入能力" subtitle="Write Speed" value="12.5k" sub="每秒处理文档数" />
-                  <MetricCard title="内存消耗" subtitle="RAM Cost" value="1.2 GB" sub="词典(FST)常驻内存" />
-                  <MetricCard title="合并压力" subtitle="Merge Task" value="低" sub="磁盘 I/O 处于健康状态" />
-                </div>
-
-                {/* 写入数据流优化 */}
-                <div className="lg:col-span-8 bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
-                  <h3 className="text-lg font-black mb-8 flex items-center gap-2 uppercase tracking-tight text-slate-800 dark:text-white">
-                    <Server size={18} className="text-blue-500"/> 
-                    学习重点：数据的生命周期 (Memory {'->'} Cache {'->'} Disk)
-                  </h3>
-                  
-                  <div className="relative flex flex-col gap-10">
-                    {/* Phase 01: 原子写入 */}
-                    <div className="flex items-center gap-4">
-                      <div className="w-24 text-[10px] font-black text-slate-400 uppercase font-mono tracking-widest text-center">第一步<br/><span className="text-[8px] opacity-60 font-normal">数据接入</span></div>
-                      <div className="flex-1 flex gap-4">
-                        <div className="flex-1 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-blue-500/30">
-                          <div className="text-[10px] font-black text-blue-500 mb-1 tracking-widest uppercase">Indexing Buffer</div>
-                          <div className="text-xs font-bold">写入缓冲区。此时对搜索<span className="text-red-500 px-1 font-black">不可见</span>。</div>
-                        </div>
-                        <div className="w-1/3 p-4 bg-orange-50 dark:bg-orange-900/10 rounded-2xl border-2 border-orange-500/30 border-dashed text-center">
-                          <div className="text-[10px] font-black text-orange-500 mb-1 tracking-widest uppercase">Translog</div>
-                          <div className="text-xs font-medium text-slate-500 leading-tight">同步记日志。保障数据安全性。</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Trigger: Refresh */}
-                    <div className="flex items-center gap-4">
-                      <div className="w-24 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center font-mono flex flex-col">
-                        <Clock size={14} className="mx-auto mb-1 opacity-40"/>
-                        触发 Refresh
-                      </div>
-                      <div className="flex-1 flex items-center justify-center">
-                         <div className="h-[2px] w-full bg-slate-200 dark:bg-slate-800 relative">
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-[9px] font-black tracking-widest shadow-lg shadow-blue-500/20 uppercase">
-                              可见性分水岭：Buffer 转化为 Segment
-                            </div>
-                         </div>
-                      </div>
-                    </div>
-
-                    {/* Phase 02: 内存段可见性 */}
-                    <div className="flex items-center gap-4">
-                      <div className="w-24 text-[10px] font-black text-slate-400 uppercase font-mono tracking-widest text-center">第二步<br/><span className="text-[8px] opacity-60 font-normal">搜索可见</span></div>
-                      <div className="flex-1 flex gap-4">
-                        <div className="flex-1 p-4 bg-green-50 dark:bg-green-900/10 rounded-2xl border-2 border-green-500/30 relative overflow-hidden group">
-                          <div className="text-[10px] font-black text-green-500 mb-1 tracking-widest uppercase font-mono tracking-tighter">OS Page Cache (Segments)</div>
-                          <div className="text-xs font-bold">转为段文件。搜索可查，但尚未完成<span className="text-blue-600 px-1">物理落盘</span>。</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Trigger: Flush */}
-                    <div className="flex items-center gap-4">
-                      <div className="w-24 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center font-mono flex flex-col">
-                        <Zap size={14} className="mx-auto mb-1 opacity-40 text-red-500"/>
-                        触发 Flush
-                      </div>
-                      <div className="flex-1 flex items-center justify-center">
-                         <div className="h-[2px] w-full bg-red-100 dark:bg-red-900/30 border-t-2 border-dashed border-red-400 relative">
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-600 text-white px-4 py-1 rounded-full text-[9px] font-black tracking-widest shadow-lg shadow-red-500/20 uppercase">
-                              持久化流程：数据真正写入磁盘
-                            </div>
-                         </div>
-                      </div>
-                    </div>
-
-                    {/* Phase 03: 物理存储 */}
-                    <div className="flex items-center gap-4">
-                      <div className="w-24 text-[10px] font-black text-slate-400 uppercase font-mono tracking-widest text-center">第三步<br/><span className="text-[8px] opacity-60 font-normal">持久化</span></div>
-                      <div className="flex-1 flex gap-4">
-                        <div className="flex-1 p-4 bg-slate-100 dark:bg-slate-800 rounded-2xl border-2 border-slate-400/30 relative">
-                          <div className="text-[10px] font-black text-slate-400 mb-1 tracking-widest uppercase">Physical Disk Storage</div>
-                          <div className="text-xs font-medium text-slate-600 dark:text-slate-400 leading-tight">执行 Fsync。数据物理安全，清空已过期的 Translog。</div>
-                          
-                          {/* 异步路径：Merge */}
-                          <div className="absolute -right-4 top-1/2 -translate-y-1/2 translate-x-full hidden lg:flex items-center gap-3">
-                             <div className="h-px w-8 bg-purple-400 border-t-2 border-dashed border-purple-400"></div>
-                             <div className="p-3 bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-500/40 rounded-2xl w-32 shadow-lg animate-pulse-slow">
-                                <div className="text-[9px] font-black text-purple-600 dark:text-purple-400 mb-1 flex items-center gap-1 uppercase"><Recycle size={10}/> Background Merge</div>
-                                <div className="text-[8px] font-bold text-slate-500 leading-tight">段合并：清理标记删除文档，将碎段重组。</div>
-                             </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-12 p-4 bg-orange-50 dark:bg-orange-900/10 rounded-2xl border border-orange-100 dark:border-orange-900/20">
-                    <h4 className="text-xs font-black text-orange-700 dark:text-orange-400 flex items-center gap-1 mb-1 uppercase tracking-wider"><Recycle size={14}/> 深度考点：Merge (段合并) 的价值</h4>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-                        <strong>异步治理：</strong> Merge 是 ES 维持高性能的关键。它在后台悄悄进行，主要职责是：1. 减少段数量以降低搜索时的 I/O 扇出；2. <strong>真正物理剔除</strong>被标记为删除的文档，释放磁盘空间。
-                    </p>
-                  </div>
-                </div>
-
-                {/* 索引解剖结构交互区 */}
-                <div className="lg:col-span-4 space-y-6">
-                  <div className="bg-slate-950 text-white p-6 rounded-[2.5rem] shadow-2xl border border-slate-800 relative overflow-hidden transition-all">
-                    <h4 className="text-sm font-black mb-6 flex items-center gap-2 text-purple-400 uppercase tracking-tight">
-                      <HardDrive size={18}/> 索引物理构造 (Anatomy)
-                    </h4>
-                    
-                    <div className="space-y-6">
-                      <div className="p-4 bg-white/5 rounded-2xl border border-white/10 relative">
-                         <div className="text-[9px] text-slate-500 font-black uppercase mb-3 tracking-widest">
-                           【第一层】索引 (Index) - 逻辑单元
-                         </div>
-                         <div className="flex gap-2">
-                           {Object.entries(indexData).map(([id, data]) => (
-                             <button 
-                               key={id}
-                               onClick={() => setActiveIndexId(id)}
-                               className={`flex-1 h-8 rounded-xl flex items-center justify-center text-[10px] font-black transition-all border tracking-tighter ${
-                                 activeIndexId === id 
-                                 ? 'bg-purple-600 border-purple-400 text-white shadow-lg shadow-purple-500/20' 
-                                 : 'bg-white/5 border-white/10 text-slate-500 hover:bg-white/10'
-                               }`}
-                             >
-                               {data.name}
-                             </button>
-                           ))}
-                         </div>
-                         <div className="absolute -bottom-6 left-1/2 w-px h-6 bg-slate-800" />
-                      </div>
-
-                      <div className="space-y-3">
-                        {indexData[activeIndexId].shards.map((shard, sIdx) => (
-                          <div key={sIdx} className="p-4 bg-blue-900/10 rounded-2xl border-2 border-blue-500/40 relative animate-in fade-in slide-in-from-right-2">
-                            <div className="text-[9px] text-blue-400 font-black uppercase mb-3 tracking-widest flex justify-between items-center">
-                              <span>【第二层】分片 #{shard.id} ({shard.type})</span>
-                              <span className="bg-blue-600 text-white px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-widest">LUCENE 实例</span>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-2 p-2 bg-slate-900/50 rounded-xl border border-white/5">
-                              {shard.segments.map((seg, gIdx) => (
-                                <div key={gIdx} className="p-2 bg-blue-600/20 border border-blue-400/30 rounded-lg flex flex-col gap-1 hover:bg-blue-600/40 transition-colors">
-                                  <span className="text-[7px] font-mono font-black text-blue-300 uppercase truncate">【第三层】{seg}</span>
-                                  <div className="h-0.5 w-full bg-blue-500/20 rounded-full overflow-hidden">
-                                    <div className="h-full bg-blue-400 w-2/3" />
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="mt-8 p-4 bg-purple-900/20 border border-purple-500/20 rounded-2xl">
-                      <p className="text-[10px] text-slate-400 leading-relaxed font-medium">
-                        <strong>场景解析:</strong> {indexData[activeIndexId].desc}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <h4 className="font-black text-xs mb-4 uppercase tracking-widest text-slate-400 flex items-center gap-2"><Info size={14}/> 专家巡检笔记</h4>
-                    <ul className="space-y-3">
-                      <CheckItem text="分片尺寸建议维持在 20GB~40GB" />
-                      <CheckItem text="避免分片数超过堆内存承载能力" />
-                      <CheckItem text="生产环境务必禁用无用的 _source" />
-                      <CheckItem text="对只读索引定期执行 Force Merge" />
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 2. 倒排索引引擎 */}
-            {selectedTopic === 'engine' && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-5 space-y-6">
-                  <div className="bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <h3 className="font-black mb-4 flex items-center gap-2 text-orange-500 uppercase tracking-tighter"><Search size={20}/> 实验：实时索引模拟器</h3>
-                    <div className="space-y-4">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">输入文档内容 (试试修改它)</label>
-                        <input className="w-full p-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-800 rounded-xl text-xs font-medium focus:border-blue-500 outline-none transition-all" value={doc1} onChange={e=>setDoc1(e.target.value)} />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">输入另一份文档</label>
-                        <input className="w-full p-3 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-800 rounded-xl text-xs font-medium focus:border-blue-500 outline-none transition-all" value={doc2} onChange={e=>setDoc2(e.target.value)} />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-slate-900 text-white p-6 rounded-[2rem] shadow-lg">
-                    <h4 className="font-bold text-sm mb-2 text-orange-400 uppercase tracking-wider">进阶笔记：为什么 ES 搜索快？</h4>
-                    <p className="text-xs opacity-80 leading-relaxed font-medium">
-                      秘密在于 <strong>FST (有限状态转换器)</strong>。它像一个超高度压缩的字典，把海量的词条(Terms)存放在内存里。搜词时不需要扫磁盘，毫秒间就能定位到文档。
-                    </p>
-                  </div>
-                </div>
-                <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden text-center md:text-left">
-                  <h3 className="font-black mb-4 flex justify-between items-center text-sm uppercase tracking-tight">
-                    数据透视：生成的词典与倒排列表
-                    <span className="text-[9px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-400 font-black tracking-widest uppercase">自动按字典序排列</span>
-                  </h3>
-                  <div className="grid grid-cols-2 gap-px bg-slate-200 dark:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden shadow-sm">
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800 font-black text-[10px] uppercase text-slate-400 tracking-tighter">词项 Term (分词结果)</div>
-                    <div className="p-3 bg-slate-50 dark:bg-slate-800 font-black text-[10px] uppercase text-slate-400 tracking-tighter">倒排列表 Posting List (文档 ID)</div>
-                    {Object.entries(invertedIndex).sort().map(([term, ids]) => (
-                      <React.Fragment key={term}>
-                        <div className="p-3 bg-white dark:bg-slate-900 text-xs font-mono text-blue-600 font-bold">{term}</div>
-                        <div className="p-3 bg-white dark:bg-slate-900 text-xs font-mono flex gap-1 justify-center md:justify-start">
-                          {ids.map(id => <span key={id} className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800/30 text-blue-600 dark:text-blue-400 rounded text-[10px] font-black">{id}</span>)}
-                        </div>
-                      </React.Fragment>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* 3. 建模映射策略 */}
-            {selectedTopic === 'mapping' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-slate-900 p-8 rounded-[2.5rem] text-green-400 font-mono text-xs shadow-2xl relative border border-slate-800">
-                  <div className="flex items-center gap-2 mb-6 text-slate-500 border-b border-slate-800 pb-2 uppercase font-black tracking-widest">
-                    <Terminal size={14}/> 实战代码：定义你的生产 Mapping
-                  </div>
-                  <pre className="leading-relaxed font-mono">
-{`{
-  "mappings": {
-    "dynamic": "strict", // 重点：严禁动态映射
-    "properties": {
-      "user_id": { "type": "keyword" },
-      "message": { 
-        "type": "text",
-        "analyzer": "ik_max_word",
-        "fields": {
-          "raw": { 
-            "type": "keyword", 
-            "ignore_above": 256 
-          }
-        }
       }
     }
-  }
-}`}
-                  </pre>
-                </div>
-                <div className="space-y-4">
-                  <div className="p-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm border-l-4 border-l-purple-500">
-                    <h4 className="font-black text-sm mb-2 uppercase flex items-center gap-2 tracking-tight">
-                      <ShieldCheck size={16} className="text-purple-500"/> 
-                      重点强调：为什么不能乱开“动态映射”?
-                    </h4>
-                    <p className="text-xs text-slate-500 leading-relaxed font-medium">
-                      在生产环境中，让 ES 猜类型是非常危险的。猜错了（比如把数值当成字符串）会导致整个索引必须重来。通过 <code>dynamic: strict</code> 强制要求手动定义每一个字段，这是高手入门的第一课。
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-1 gap-4">
-                    <MasteryPoint title="Keyword 怎么选？" desc="不需要分词的字段全用 keyword。排序、聚合、精确匹配都靠它，性能快到飞起。" />
-                    <MasteryPoint title="什么是多字段策略？" desc="想搜得准又想排得好？同一份数据存为两种类型（text+keyword），兼顾灵活性与速度。" />
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {/* 4. 写入性能调优 */}
-            {selectedTopic === 'tuning' && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <TuneCard title="降低刷新频率" value="Refresh: 60s" desc="别为了实时性搞垮了 I/O。在大规模写入时调大它，性能提升立竿见影。" />
-                  <TuneCard title="开启日志异步化" value="Translog: Async" desc="追求吞吐量的终极武器。虽然有极小丢数据风险，但并发能力翻倍。" />
-                  <TuneCard title="控制批写规模" value="Bulk: 10MB" desc="Bulk 不是越大越好。太大会撑爆内存(OOM)，太小会慢在网络上。10MB 是黄金点。" />
-                  <TuneCard title="选择压缩算法" value="Codec: LZ4" desc="默认首选，速度快。磁盘不够用再考虑压缩比更高的 DEFLATE。" />
-                </div>
-                <div className="p-8 bg-blue-600 rounded-[2.5rem] text-white flex items-center gap-8 shadow-xl">
-                   <div className="hidden md:block p-4 bg-white/10 rounded-3xl"><BarChart3 size={40}/></div>
-                   <div>
-                     <h4 className="text-xl font-black mb-2 uppercase tracking-tight font-black underline decoration-blue-400">进阶：分片规划的“金法则”</h4>
-                     <p className="text-sm opacity-90 leading-relaxed max-w-2xl font-medium">
-                       分片(Shard)过多是集群卡顿的头号原因。每个分片都要占内存，请记住：<strong>单分片控制在 20-40GB 左右</strong>，千万不要把索引分得太碎！
-                     </p>
-                   </div>
-                </div>
-              </div>
-            )}
+    // 2. 初始化节点
+    const nodes = Array.from({ length: nodeCount }, (_, i) => ({
+      id: i,
+      name: `Node ${i + 1}`,
+      shards: []
+    }));
+    const unassigned = [];
 
-            {/* 其他模块略... 保持同等汉化与教程化文案水平 */}
-            {selectedTopic === 'reindex' && (
-               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-               <div className="lg:col-span-8 bg-white dark:bg-slate-900 p-10 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm relative">
-                 <h3 className="font-black text-2xl mb-8 flex items-center gap-3 tracking-tighter uppercase font-black tracking-tighter"><RefreshCcw className="text-red-500 animate-spin-slow"/> 手把手：零停机索引重建</h3>
-                 <div className="space-y-10 relative before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-1 before:bg-slate-100 dark:before:bg-slate-800">
-                   <ReindexStep num="1" title="先创建 v2 索引" desc="按照新 Mapping 准备好坑位，记得先把副本关了提速。" />
-                   <ReindexStep num="2" title="执行异步迁移任务" desc="用 _reindex 把数据搬过去，开启 slices 像多线程一样开足马力。" />
-                   <ReindexStep num="3" title="无缝切换别名" desc="数据搬完后，一键切换指向，业务代码连重启都不用。" />
-                 </div>
-               </div>
-               <div className="lg:col-span-4 space-y-4">
-                  <div className="bg-red-50 dark:bg-red-900/10 p-6 rounded-3xl border-2 border-red-100 text-red-700 dark:text-red-400 shadow-sm font-bold">
-                    <h4 className="font-black text-xs mb-4 flex items-center gap-2 uppercase tracking-widest">⚠️ 重建避坑指南</h4>
-                    <ul className="space-y-4 text-[11px] font-black">
-                      <li>❌ 数据多的时候一定要加 slices，不然搬一天都搬不完。</li>
-                      <li>❌ 别在老索引上硬改类型，那是改不掉的。</li>
-                      <li>❌ 搬家的时候记得把刷新频率关了，能快 30% 以上。</li>
-                    </ul>
-                  </div>
-                </div>
-             </div>
-            )}
+    // 3. 分配逻辑 (Greedy Allocation with Anti-affinity)
+    // ES 实际上使用更复杂的评分函数，这里使用简化的贪心算法：
+    // 优先填满空闲节点，同时保证同一分片ID的主副本不共存。
 
-            {selectedTopic === 'production' && (
-              <div className="space-y-6">
-                <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-sm">
-                   <h3 className="text-xl font-black mb-6 tracking-tight flex items-center gap-2 font-black tracking-tight"><Filter className="text-emerald-500"/> 进阶技巧：别名(Alias) 是生产环境的救命稻草</h3>
-                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <FeatureBox title="版本隔离" desc="通过别名隐藏版本号，版本升级时客户端完全没感觉。" icon={<RefreshCcw size={16}/>} />
-                      <FeatureBox title="冷热分流" desc="让新数据跑在 SSD 上，老数据自动滚到 HDD，性能成本两不误。" icon={<Layers size={16}/>} />
-                      <FeatureBox title="多租户视图" desc="用一个别名过滤出特定客户的数据，既安全又高效。" icon={<MousePointer2 size={16}/>} />
-                   </div>
-                </div>
-              </div>
-            )}
+    // 辅助函数：找到当前最适合放置该分片的节点
+    const findBestNode = (shard, currentNodes) => {
+      // 规则1: 必须不能包含该分片ID的其他副本（主或副）
+      const validNodes = currentNodes.filter(node => {
+        const hasSameShardId = node.shards.some(s => s.id === shard.id);
+        return !hasSameShardId;
+      });
 
+      if (validNodes.length === 0) return null; // 没有合法节点（通常是因为节点太少，副本太多）
+
+      // 规则2: 在合法节点中，选择负载（分片数）最小的
+      // 如果分片数相同，随机选一个或者按顺序选，这里按顺序选以保持稳定
+      validNodes.sort((a, b) => a.shards.length - b.shards.length);
+      return validNodes[0];
+    };
+
+    // 先分配主分片 (通常主分片优先)
+    const primaries = totalShards.filter(s => s.type === 'p');
+    const reps = totalShards.filter(s => s.type === 'r');
+
+    // 混合队列分配
+    [...primaries, ...reps].forEach(shard => {
+      const targetNode = findBestNode(shard, nodes);
+      if (targetNode) {
+        targetNode.shards.push(shard);
+      } else {
+        unassigned.push(shard);
+      }
+    });
+
+    // --- 4. 状态计算与移动检测 ---
+    const currentAllocation = {};
+    const relocating = [];
+
+    nodes.forEach(node => {
+      node.shards.forEach(shard => {
+        currentAllocation[shard.uid] = node.id;
+        // 检查是否移动
+        if (prevAllocationRef.current[shard.uid] !== undefined && 
+            prevAllocationRef.current[shard.uid] !== node.id) {
+          relocating.push(shard.uid);
+        }
+      });
+    });
+
+    // 确定集群健康状态
+    let status = 'green';
+    if (unassigned.length > 0) {
+      // 如果有主分片未分配，则是 Red
+      const hasUnassignedPrimary = unassigned.some(s => s.type === 'p');
+      status = hasUnassignedPrimary ? 'red' : 'yellow';
+    }
+
+    // 更新状态
+    prevAllocationRef.current = currentAllocation;
+    setClusterState({
+      nodes,
+      unassigned,
+      status,
+      relocatingShards: relocating
+    });
+  };
+
+  // 当配置变化时自动重平衡
+  useEffect(() => {
+    rebalanceCluster();
+  }, [nodeCount, primaryShards, replicas]);
+
+  // --- 样式辅助 ---
+  const getStatusColor = (s) => {
+    if (s === 'green') return 'bg-green-100 text-green-700 border-green-300';
+    if (s === 'yellow') return 'bg-yellow-100 text-yellow-700 border-yellow-300';
+    return 'bg-red-100 text-red-700 border-red-300';
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 p-6 font-sans text-slate-800">
+      
+      <div className="max-w-6xl mx-auto">
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <Database className="text-blue-600" />
+              ES 集群分片动态仿真
+            </h1>
+            <p className="text-slate-500 text-sm mt-1">
+              调整参数，观察 Elasticsearch 如何自动分配分片并保证高可用
+            </p>
+          </div>
+          
+          <div className={`px-4 py-2 rounded-lg border flex items-center gap-2 font-bold shadow-sm ${getStatusColor(clusterState.status)}`}>
+            {clusterState.status === 'green' && <CheckCircle size={20} />}
+            {clusterState.status === 'yellow' && <AlertTriangle size={20} />}
+            {clusterState.status === 'red' && <AlertTriangle size={20} />}
+            Status: {clusterState.status.toUpperCase()}
           </div>
         </div>
-      </main>
+
+        {/* --- 控制面板 --- */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+          
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <label className="font-semibold text-sm text-slate-700">节点数量 (Nodes)</label>
+              <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">{nodeCount}</span>
+            </div>
+            <input 
+              type="range" min="1" max="10" value={nodeCount} 
+              onChange={(e) => setNodeCount(parseInt(e.target.value))}
+              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+            />
+            <p className="text-xs text-slate-400">增加节点会自动触发 rebalance</p>
+          </div>
+
+          <div className="space-y-2">
+             <div className="flex justify-between">
+              <label className="font-semibold text-sm text-slate-700">主分片 (Primary)</label>
+              <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">{primaryShards}</span>
+            </div>
+            <input 
+              type="range" min="1" max="20" value={primaryShards} 
+              onChange={(e) => setPrimaryShards(parseInt(e.target.value))}
+              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+            />
+             <p className="text-xs text-slate-400">索引创建后通常不可改</p>
+          </div>
+
+          <div className="space-y-2">
+             <div className="flex justify-between">
+              <label className="font-semibold text-sm text-slate-700">副本数 (Replicas)</label>
+              <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">{replicas}</span>
+            </div>
+            <input 
+              type="range" min="0" max="2" value={replicas} 
+              onChange={(e) => setReplicas(parseInt(e.target.value))}
+              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+            />
+             <p className="text-xs text-slate-400">每个主分片对应的备份数量</p>
+          </div>
+        </div>
+
+        {/* --- 未分配区域 (Yellow/Red 状态展示) --- */}
+        {clusterState.unassigned.length > 0 && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-xl flex flex-col gap-2 animate-pulse">
+            <h3 className="text-red-800 font-bold flex items-center gap-2 text-sm">
+              <AlertTriangle size={16}/> 
+              未分配分片 ({clusterState.unassigned.length})
+              <span className="font-normal opacity-75">- 可能是节点不足以满足反亲和性（副本不能和主分片在同节点）</span>
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {clusterState.unassigned.map((shard) => (
+                <div key={shard.uid} className={`w-8 h-8 flex items-center justify-center rounded text-xs font-bold shadow-sm bg-slate-300 text-slate-500 border-2 border-slate-400`}>
+                  {shard.type === 'p' ? `P${shard.id}` : `R${shard.id}`}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* --- 集群可视化区域 --- */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {clusterState.nodes.map((node) => (
+            <div key={node.id} className="bg-white rounded-xl shadow border border-slate-200 overflow-hidden flex flex-col transition-all duration-300">
+              {/* 节点头部 */}
+              <div className="bg-slate-50 p-3 border-b flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Server size={18} className="text-slate-600" />
+                  <span className="font-bold text-sm text-slate-700">{node.name}</span>
+                </div>
+                <span className="text-xs bg-slate-200 px-2 py-0.5 rounded text-slate-600 font-mono">
+                  {node.shards.length} shards
+                </span>
+              </div>
+
+              {/* 分片容器 */}
+              <div className="p-4 flex-1 bg-slate-50/50 min-h-[120px]">
+                <div className="flex flex-wrap content-start gap-2">
+                  {node.shards.length === 0 && (
+                    <div className="w-full h-full flex items-center justify-center text-slate-300 text-xs italic mt-8">
+                      空闲节点
+                    </div>
+                  )}
+                  
+                  {node.shards.sort((a,b) => a.id - b.id).map((shard) => {
+                    const isRelocating = clusterState.relocatingShards.includes(shard.uid);
+                    return (
+                      <div 
+                        key={shard.uid}
+                        className={`
+                          relative w-10 h-10 flex items-center justify-center rounded text-xs font-bold shadow-sm border-2 cursor-help transition-all duration-500
+                          ${shard.type === 'p' ? 'bg-blue-500 border-blue-600 text-white' : 'bg-white border-blue-300 text-blue-600'}
+                          ${isRelocating ? 'ring-4 ring-yellow-400 scale-110 z-10' : 'hover:scale-105'}
+                        `}
+                        title={`${shard.type === 'p' ? 'Primary' : 'Replica'} Shard ${shard.id}`}
+                      >
+                        {shard.type === 'p' ? 'P' : 'R'}{shard.id}
+                        
+                        {/* 搬迁指示器 */}
+                        {isRelocating && (
+                           <span className="absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 rounded-full p-[2px]">
+                             <RefreshCw size={8} className="animate-spin" />
+                           </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* --- 说明区域 --- */}
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-slate-600 bg-blue-50 p-4 rounded-xl border border-blue-100">
+          <div>
+            <h4 className="font-bold text-blue-800 mb-2 flex items-center gap-2">
+              <Info size={16}/> 观察指南
+            </h4>
+            <ul className="list-disc pl-4 space-y-1">
+              <li><strong>P</strong> = 主分片 (Primary)，<strong>R</strong> = 副本分片 (Replica)。</li>
+              <li>试着把 <span className="font-mono bg-white px-1 rounded">Nodes</span> 设为 1，你会发现所有 R 分片变成未分配 (Unassigned)，集群变黄，因为副本无法和主分片放在一起。</li>
+              <li>试着增加 <span className="font-mono bg-white px-1 rounded">Nodes</span>，观察带有黄色旋转图标的分片，那就是 ES 正在搬运的数据。</li>
+            </ul>
+          </div>
+          <div>
+             <h4 className="font-bold text-blue-800 mb-2">平衡策略</h4>
+             <p className="leading-relaxed">
+               此模拟器使用了简化的贪心算法：总是优先把分片分配给负载（分片数）最小的合法节点。这完美模拟了 ES 的 <span className="font-mono text-blue-700">cluster.routing.allocation.balance</span> 行为。
+             </p>
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 };
 
-// UI 原子组件
-const MetricCard = ({ title, subtitle, value, sub, status }) => (
-  <div className="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm transition-all hover:shadow-md group">
-    <div className="flex items-center justify-between mb-1 text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase tracking-widest">
-      <span className="truncate pr-2">{title}</span>
-      {status && <div className={`w-2 h-2 rounded-full ${status} animate-pulse shrink-0`} />}
-    </div>
-    <div className="text-[9px] font-bold text-slate-400 mb-2 uppercase tracking-tighter font-mono">{subtitle}</div>
-    <div className="text-xl font-black tracking-tighter uppercase group-hover:text-blue-600 transition-colors">{value}</div>
-    <div className="text-[10px] font-bold text-slate-500 mt-1 uppercase opacity-60 tracking-tighter">{sub}</div>
-  </div>
-);
-
-const MasteryPoint = ({ title, desc }) => (
-  <div className="p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm border-l-4 border-l-blue-500">
-    <h4 className="font-black text-sm mb-1 uppercase tracking-tighter leading-tight font-black">{title}</h4>
-    <p className="text-xs text-slate-500 leading-relaxed font-medium">{desc}</p>
-  </div>
-);
-
-const TuneCard = ({ title, value, desc }) => (
-  <div className="p-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-200 dark:border-slate-800 shadow-sm group hover:border-blue-500 transition-all">
-    <div className="flex justify-between items-start mb-4 font-black">
-      <h4 className="text-sm tracking-tight">{title}</h4>
-      <span className="text-[9px] bg-blue-50 dark:bg-blue-900/30 text-blue-600 px-3 py-1 rounded-full font-mono uppercase font-black">{value}</span>
-    </div>
-    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-medium">{desc}</p>
-  </div>
-);
-
-const ReindexStep = ({ num, title, desc }) => (
-  <div className="flex gap-6 group relative z-10">
-    <div className="w-8 h-8 rounded-full bg-slate-950 text-white text-[12px] font-black flex items-center justify-center shrink-0 shadow-xl group-hover:scale-110 transition-transform border border-slate-800 font-mono font-black">{num}</div>
-    <div className="pb-2">
-      <h4 className="font-black text-sm uppercase tracking-tighter font-black">{title}</h4>
-      <p className="text-xs text-slate-500 mt-1 font-medium leading-relaxed font-medium">{desc}</p>
-    </div>
-  </div>
-);
-
-const FeatureBox = ({ title, desc, icon }) => (
-  <div className="p-6 bg-slate-50 dark:bg-slate-800 rounded-3xl border-2 border-transparent hover:border-emerald-500 transition-all cursor-default group">
-    <div className="text-emerald-500 mb-3 group-hover:scale-110 transition-transform">{icon}</div>
-    <h4 className="font-black text-xs mb-2 uppercase tracking-widest font-black">{title}</h4>
-    <p className="text-[10px] text-slate-500 leading-relaxed font-bold font-bold">{desc}</p>
-  </div>
-);
-
-const CheckItem = ({ text }) => (
-  <li className="flex items-start gap-3 group">
-    <div className="mt-1 flex-shrink-0"><ShieldCheck size={16} className="text-green-500 group-hover:scale-125 transition-transform"/></div>
-    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 leading-tight tracking-tight uppercase tracking-tight font-bold">{text}</span>
-  </li>
-);
-
-export default App;
+export default ClusterSimulator;
