@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet } from 'react-router-dom';
 import { 
   Activity, 
@@ -14,14 +14,43 @@ import {
   ChevronDown,
   ChevronRight,
   ZoomIn,
-  Database
+  Database,
+  Network,
+  Brain
 } from 'lucide-react';
 
 const ElasticsearchLayout = () => {
   const location = useLocation();
-  const [expandedMenus, setExpandedMenus] = useState({
-    principles: location.pathname.startsWith('/elasticsearch/principles')
-  });
+  
+  // 根据当前路径自动展开对应的菜单
+  const getInitialExpandedMenus = (pathname) => {
+    const expanded = {};
+    if (pathname.startsWith('/elasticsearch/cluster')) {
+      expanded.cluster = true;
+    }
+    if (pathname.startsWith('/elasticsearch/index')) {
+      expanded.index = true;
+    }
+    if (pathname.startsWith('/elasticsearch/shard')) {
+      expanded.shard = true;
+    }
+    if (pathname.startsWith('/elasticsearch/segment')) {
+      expanded.segment = true;
+    }
+    if (pathname.startsWith('/elasticsearch/query')) {
+      expanded.query = true;
+    }
+    return expanded;
+  };
+
+  const [expandedMenus, setExpandedMenus] = useState(() => 
+    getInitialExpandedMenus(location.pathname)
+  );
+
+  // 当路径变化时，自动展开对应的菜单
+  useEffect(() => {
+    setExpandedMenus(getInitialExpandedMenus(location.pathname));
+  }, [location.pathname]);
 
   const toggleMenu = (menuKey) => {
     setExpandedMenus(prev => ({
@@ -38,54 +67,72 @@ const ElasticsearchLayout = () => {
       exact: true
     },
     { 
-      path: '/elasticsearch/shard-distribution', 
-      label: '分片分布可视化', 
-      icon: Activity 
-    },
-    { 
-      path: '/elasticsearch/basic-concepts', 
-      label: '基础概念', 
-      icon: BookOpen,
-      disabled: true 
-    },
-    { 
-      path: '/elasticsearch/principles', 
-      label: '原理与架构', 
-      icon: Layers,
+      path: '/elasticsearch/cluster', 
+      label: '集群', 
+      icon: Server,
       disabled: false,
       children: [
         {
-          path: '/elasticsearch/principles/architecture',
-          label: 'ES 架构全景图',
+          path: '/elasticsearch/cluster/architecture',
+          label: '集群架构全景图',
           icon: ZoomIn
         },
         {
-          path: '/elasticsearch/principles/shard-simulation',
-          label: 'ES 集群分片动态仿真',
+          path: '/elasticsearch/cluster/shard-distribution',
+          label: '分片分布可视化',
+          icon: Activity
+        },
+        {
+          path: '/elasticsearch/cluster/shard-simulation',
+          label: '分片动态仿真',
+          icon: Network
+        }
+      ]
+    },
+    { 
+      path: '/elasticsearch/index', 
+      label: '索引', 
+      icon: Database,
+      disabled: false,
+      children: [
+        {
+          path: '/elasticsearch/index/write-flow',
+          label: '索引写入流程',
           icon: FileText
-        },
+        }
+      ]
+    },
+    { 
+      path: '/elasticsearch/shard', 
+      label: '分片', 
+      icon: Layers,
+      disabled: true,
+      children: []
+    },
+    { 
+      path: '/elasticsearch/segment', 
+      label: '段', 
+      icon: FileText,
+      disabled: false,
+      children: [
         {
-          path: '/elasticsearch/principles/index-principles',
-          label: '索引原理',
-          icon: Database
-        },
-        {
-          path: '/elasticsearch/principles/segment',
+          path: '/elasticsearch/segment/principles',
           label: 'Segment 原理',
           icon: FileText
         }
       ]
     },
     { 
+      path: '/elasticsearch/query', 
+      label: '查询原理', 
+      icon: Brain,
+      disabled: true,
+      children: []
+    },
+    { 
       path: '/elasticsearch/search-api', 
       label: '搜索 API', 
       icon: Search,
-      disabled: true 
-    },
-    { 
-      path: '/elasticsearch/cluster-management', 
-      label: '集群管理', 
-      icon: Server,
       disabled: true 
     },
     { 
@@ -96,14 +143,8 @@ const ElasticsearchLayout = () => {
     },
     { 
       path: '/elasticsearch/monitoring', 
-      label: '监控与运维', 
+      label: '运维与监控', 
       icon: BarChart3,
-      disabled: true 
-    },
-    { 
-      path: '/elasticsearch/configuration', 
-      label: '配置详解', 
-      icon: Settings,
       disabled: true 
     }
   ];
@@ -137,7 +178,7 @@ const ElasticsearchLayout = () => {
             const active = isActive(item.path, item.exact);
             const disabled = item.disabled;
             const hasChildren = item.children && item.children.length > 0;
-            const menuKey = item.path.split('/').pop();
+            const menuKey = item.path.split('/').pop() || 'root';
             const isExpanded = expandedMenus[menuKey];
 
             if (disabled) {

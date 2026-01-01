@@ -1,89 +1,53 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  Layers,
-  FileText,
-  Database,
-  Search,
-  Zap,
+  Server,
+  ZoomIn,
+  Activity,
   Network,
-  RefreshCw,
-  ArrowRight,
-  ZoomIn
+  ArrowRight
 } from 'lucide-react';
 
-const PrinciplesIndex = () => {
+const ClusterIndex = () => {
   const topics = [
     {
-      id: 'architecture-hierarchy',
-      title: 'ES 架构全景图',
+      id: 'architecture',
+      title: '集群架构全景图',
       description: '交互式探索从 Cluster 到 Segment 的完整架构层次，物理层、逻辑层、底层核心',
       icon: ZoomIn,
-      path: '/elasticsearch/principles/architecture',
+      path: '/elasticsearch/cluster/architecture',
+      available: true
+    },
+    {
+      id: 'shard-distribution',
+      title: '分片分布可视化',
+      description: '可视化展示 ES 集群中分片的分布情况，理解分片在节点间的分配机制',
+      icon: Activity,
+      path: '/elasticsearch/cluster/shard-distribution',
       available: true
     },
     {
       id: 'shard-simulation',
-      title: 'ES 集群分片动态仿真',
+      title: '分片动态仿真',
       description: '动态仿真 ES 集群分片的分布、迁移和负载均衡过程',
       icon: Network,
-      path: '/elasticsearch/principles/shard-simulation',
+      path: '/elasticsearch/cluster/shard-simulation',
       available: true
     },
     {
-      id: 'index-principles',
-      title: '索引流程',
-      description: '深入理解索引的写入流程',
-      icon: Database,
-      path: '/elasticsearch/principles/index-principles',
-      available: true
-    },
-    {
-      id: 'segment',
-      title: 'Segment 原理',
-      description: '深入理解 Segment 的存储结构、创建机制和合并策略',
-      icon: FileText,
-      path: '/elasticsearch/principles/segment',
-      available: true
-    },
-    {
-      id: 'inverted-index',
-      title: '倒排索引原理',
-      description: '倒排索引的数据结构、构建过程和查询机制',
-      icon: Search,
-      path: '/elasticsearch/principles/inverted-index',
+      id: 'node-management',
+      title: '节点管理',
+      description: '节点角色、节点发现、节点加入和退出机制',
+      icon: Server,
+      path: '/elasticsearch/cluster/node-management',
       available: false
     },
     {
-      id: 'storage',
-      title: '存储机制',
-      description: 'Translog、Refresh、Flush 等存储机制详解',
-      icon: Database,
-      path: '/elasticsearch/principles/storage',
-      available: false
-    },
-    {
-      id: 'query-execution',
-      title: '查询执行原理',
-      description: '查询流程、评分机制、聚合执行原理',
-      icon: Zap,
-      path: '/elasticsearch/principles/query-execution',
-      available: false
-    },
-    {
-      id: 'distributed',
-      title: '分布式原理',
-      description: '分布式一致性、分片路由、副本同步机制',
-      icon: Network,
-      path: '/elasticsearch/principles/distributed',
-      available: false
-    },
-    {
-      id: 'lifecycle',
-      title: '索引生命周期',
-      description: '索引创建、更新、删除的完整生命周期',
-      icon: RefreshCw,
-      path: '/elasticsearch/principles/lifecycle',
+      id: 'cluster-health',
+      title: '集群健康监控',
+      description: '集群状态、健康检查、故障检测和恢复机制',
+      icon: Activity,
+      path: '/elasticsearch/cluster/health',
       available: false
     }
   ];
@@ -94,13 +58,13 @@ const PrinciplesIndex = () => {
         {/* 头部 */}
         <header className="mb-8">
           <div className="flex items-center mb-4">
-            <Layers className="text-5xl text-blue-600 mr-4" />
+            <Server className="text-5xl text-blue-600 mr-4" />
             <div>
               <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
-                原理与架构
+                集群（Cluster）
               </h1>
               <p className="text-lg text-gray-600">
-                深入理解 Elasticsearch 的底层原理和架构设计
+                深入理解 Elasticsearch 集群的架构、分片分布和节点管理
               </p>
             </div>
           </div>
@@ -108,24 +72,23 @@ const PrinciplesIndex = () => {
 
         {/* 介绍卡片 */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-blue-500">
-          <h2 className="text-xl font-bold text-gray-900 mb-3">为什么学习原理？</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-3">什么是集群？</h2>
           <p className="text-gray-700 leading-relaxed mb-4">
-            理解 Elasticsearch 的底层原理，能够帮助我们更好地使用和优化 Elasticsearch。
-            从 Segment 的存储机制到分布式一致性，从倒排索引的构建到查询的执行流程，
-            这些知识将帮助你深入理解 Elasticsearch 的工作原理，从而做出更明智的技术决策。
+            Elasticsearch 集群是由一个或多个节点组成的分布式系统。集群提供了高可用性、
+            水平扩展能力和数据冗余。理解集群的工作原理，能够帮助我们更好地设计和管理 Elasticsearch 系统。
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-blue-900 mb-1">性能优化</h3>
-              <p className="text-sm text-blue-700">理解原理才能找到性能瓶颈</p>
+              <h3 className="font-semibold text-blue-900 mb-1">高可用性</h3>
+              <p className="text-sm text-blue-700">通过副本机制保证服务可用</p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-green-900 mb-1">问题排查</h3>
-              <p className="text-sm text-green-700">掌握原理才能快速定位问题</p>
+              <h3 className="font-semibold text-green-900 mb-1">水平扩展</h3>
+              <p className="text-sm text-green-700">通过增加节点提升集群性能</p>
             </div>
             <div className="bg-purple-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-purple-900 mb-1">架构设计</h3>
-              <p className="text-sm text-purple-700">理解原理才能设计合理架构</p>
+              <h3 className="font-semibold text-purple-900 mb-1">负载均衡</h3>
+              <p className="text-sm text-purple-700">自动分配分片实现负载均衡</p>
             </div>
           </div>
         </div>
@@ -188,8 +151,8 @@ const PrinciplesIndex = () => {
                 1
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 mb-1">Segment 原理</h4>
-                <p className="text-sm text-gray-600">从最基础的存储单元开始，理解 Segment 的结构和机制</p>
+                <h4 className="font-semibold text-gray-900 mb-1">集群架构全景图</h4>
+                <p className="text-sm text-gray-600">先了解集群的整体架构，理解节点、索引、分片的关系</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
@@ -197,8 +160,8 @@ const PrinciplesIndex = () => {
                 2
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 mb-1">倒排索引原理</h4>
-                <p className="text-sm text-gray-600">理解 Elasticsearch 的核心数据结构</p>
+                <h4 className="font-semibold text-gray-900 mb-1">分片分布可视化</h4>
+                <p className="text-sm text-gray-600">理解分片在集群中的分布机制</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
@@ -206,17 +169,8 @@ const PrinciplesIndex = () => {
                 3
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 mb-1">存储机制</h4>
-                <p className="text-sm text-gray-600">掌握数据写入、刷新、持久化的完整流程</p>
-              </div>
-            </div>
-            <div className="flex items-start space-x-3">
-              <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
-                4
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-1">查询执行原理</h4>
-                <p className="text-sm text-gray-600">理解查询是如何被执行的</p>
+                <h4 className="font-semibold text-gray-900 mb-1">分片动态仿真</h4>
+                <p className="text-sm text-gray-600">深入理解分片的迁移和负载均衡过程</p>
               </div>
             </div>
           </div>
@@ -226,5 +180,5 @@ const PrinciplesIndex = () => {
   );
 };
 
-export default PrinciplesIndex;
+export default ClusterIndex;
 

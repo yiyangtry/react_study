@@ -1,89 +1,45 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  Layers,
   FileText,
-  Database,
   Search,
-  Zap,
-  Network,
-  RefreshCw,
+  Database,
   ArrowRight,
-  ZoomIn
+  Layers
 } from 'lucide-react';
 
-const PrinciplesIndex = () => {
+const SegmentIndex = () => {
   const topics = [
     {
-      id: 'architecture-hierarchy',
-      title: 'ES 架构全景图',
-      description: '交互式探索从 Cluster 到 Segment 的完整架构层次，物理层、逻辑层、底层核心',
-      icon: ZoomIn,
-      path: '/elasticsearch/principles/architecture',
-      available: true
-    },
-    {
-      id: 'shard-simulation',
-      title: 'ES 集群分片动态仿真',
-      description: '动态仿真 ES 集群分片的分布、迁移和负载均衡过程',
-      icon: Network,
-      path: '/elasticsearch/principles/shard-simulation',
-      available: true
-    },
-    {
-      id: 'index-principles',
-      title: '索引流程',
-      description: '深入理解索引的写入流程',
-      icon: Database,
-      path: '/elasticsearch/principles/index-principles',
-      available: true
-    },
-    {
-      id: 'segment',
+      id: 'principles',
       title: 'Segment 原理',
       description: '深入理解 Segment 的存储结构、创建机制和合并策略',
       icon: FileText,
-      path: '/elasticsearch/principles/segment',
+      path: '/elasticsearch/segment/principles',
       available: true
+    },
+    {
+      id: 'merge-strategy',
+      title: 'Segment 合并策略',
+      description: '理解 Segment 合并的触发条件、合并策略和优化方法',
+      icon: Layers,
+      path: '/elasticsearch/segment/merge-strategy',
+      available: false
     },
     {
       id: 'inverted-index',
       title: '倒排索引原理',
       description: '倒排索引的数据结构、构建过程和查询机制',
       icon: Search,
-      path: '/elasticsearch/principles/inverted-index',
+      path: '/elasticsearch/segment/inverted-index',
       available: false
     },
     {
-      id: 'storage',
+      id: 'storage-mechanism',
       title: '存储机制',
       description: 'Translog、Refresh、Flush 等存储机制详解',
       icon: Database,
-      path: '/elasticsearch/principles/storage',
-      available: false
-    },
-    {
-      id: 'query-execution',
-      title: '查询执行原理',
-      description: '查询流程、评分机制、聚合执行原理',
-      icon: Zap,
-      path: '/elasticsearch/principles/query-execution',
-      available: false
-    },
-    {
-      id: 'distributed',
-      title: '分布式原理',
-      description: '分布式一致性、分片路由、副本同步机制',
-      icon: Network,
-      path: '/elasticsearch/principles/distributed',
-      available: false
-    },
-    {
-      id: 'lifecycle',
-      title: '索引生命周期',
-      description: '索引创建、更新、删除的完整生命周期',
-      icon: RefreshCw,
-      path: '/elasticsearch/principles/lifecycle',
+      path: '/elasticsearch/segment/storage-mechanism',
       available: false
     }
   ];
@@ -94,13 +50,13 @@ const PrinciplesIndex = () => {
         {/* 头部 */}
         <header className="mb-8">
           <div className="flex items-center mb-4">
-            <Layers className="text-5xl text-blue-600 mr-4" />
+            <FileText className="text-5xl text-blue-600 mr-4" />
             <div>
               <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
-                原理与架构
+                段（Segment）
               </h1>
               <p className="text-lg text-gray-600">
-                深入理解 Elasticsearch 的底层原理和架构设计
+                深入理解 Elasticsearch 最底层的存储单元 Segment 的工作原理
               </p>
             </div>
           </div>
@@ -108,24 +64,24 @@ const PrinciplesIndex = () => {
 
         {/* 介绍卡片 */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border-l-4 border-blue-500">
-          <h2 className="text-xl font-bold text-gray-900 mb-3">为什么学习原理？</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-3">什么是 Segment？</h2>
           <p className="text-gray-700 leading-relaxed mb-4">
-            理解 Elasticsearch 的底层原理，能够帮助我们更好地使用和优化 Elasticsearch。
-            从 Segment 的存储机制到分布式一致性，从倒排索引的构建到查询的执行流程，
-            这些知识将帮助你深入理解 Elasticsearch 的工作原理，从而做出更明智的技术决策。
+            Segment 是 Elasticsearch 中最底层的存储单元，每个分片（Shard）由多个 Segment 组成。
+            Segment 是不可变的，一旦创建就不会被修改。理解 Segment 的工作原理，能够帮助我们
+            深入理解 Elasticsearch 的存储机制、查询性能和索引优化。
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <div className="bg-blue-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-blue-900 mb-1">性能优化</h3>
-              <p className="text-sm text-blue-700">理解原理才能找到性能瓶颈</p>
+              <h3 className="font-semibold text-blue-900 mb-1">不可变性</h3>
+              <p className="text-sm text-blue-700">Segment 创建后不可修改，保证数据一致性</p>
             </div>
             <div className="bg-green-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-green-900 mb-1">问题排查</h3>
-              <p className="text-sm text-green-700">掌握原理才能快速定位问题</p>
+              <h3 className="font-semibold text-green-900 mb-1">存储优化</h3>
+              <p className="text-sm text-green-700">通过合并策略优化存储空间</p>
             </div>
             <div className="bg-purple-50 p-4 rounded-lg">
-              <h3 className="font-semibold text-purple-900 mb-1">架构设计</h3>
-              <p className="text-sm text-purple-700">理解原理才能设计合理架构</p>
+              <h3 className="font-semibold text-purple-900 mb-1">查询性能</h3>
+              <p className="text-sm text-purple-700">理解 Segment 如何影响查询性能</p>
             </div>
           </div>
         </div>
@@ -210,15 +166,6 @@ const PrinciplesIndex = () => {
                 <p className="text-sm text-gray-600">掌握数据写入、刷新、持久化的完整流程</p>
               </div>
             </div>
-            <div className="flex items-start space-x-3">
-              <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
-                4
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900 mb-1">查询执行原理</h4>
-                <p className="text-sm text-gray-600">理解查询是如何被执行的</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -226,5 +173,5 @@ const PrinciplesIndex = () => {
   );
 };
 
-export default PrinciplesIndex;
+export default SegmentIndex;
 

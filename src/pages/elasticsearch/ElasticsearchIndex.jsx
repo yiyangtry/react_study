@@ -9,34 +9,52 @@ import {
   Server,
   BookOpen,
   Zap,
-  Layers
+  Layers,
+  FileText,
+  Brain
 } from 'lucide-react';
 
 const ElasticsearchIndex = () => {
   const lessons = [
     {
-      id: 'shard-distribution',
-      title: '分片分布可视化',
-      description: '学习 Elasticsearch 集群分片分布、节点管理和数据可视化',
-      icon: Activity,
-      path: '/elasticsearch/shard-distribution',
+      id: 'cluster',
+      title: '集群',
+      description: '集群架构、分片分布、节点管理等集群相关知识',
+      icon: Server,
+      path: '/elasticsearch/cluster',
       available: true
     },
     {
-      id: 'basic-concepts',
-      title: '基础概念',
-      description: '索引、文档、分片、副本等核心概念详解',
-      icon: BookOpen,
-      path: '/elasticsearch/basic-concepts',
+      id: 'index',
+      title: '索引',
+      description: '索引创建、写入流程、生命周期管理等索引相关知识',
+      icon: Database,
+      path: '/elasticsearch/index',
+      available: true
+    },
+    {
+      id: 'shard',
+      title: '分片',
+      description: '分片原理、路由机制、副本同步等分片相关知识',
+      icon: Layers,
+      path: '/elasticsearch/shard',
       available: false
     },
     {
-      id: 'principles',
-      title: '原理与架构',
-      description: 'Segment、倒排索引、存储机制、查询执行等底层原理',
-      icon: Layers,
-      path: '/elasticsearch/principles',
+      id: 'segment',
+      title: '段',
+      description: 'Segment 原理、倒排索引、存储机制等底层存储知识',
+      icon: FileText,
+      path: '/elasticsearch/segment',
       available: true
+    },
+    {
+      id: 'query',
+      title: '查询原理',
+      description: '查询执行流程、评分机制、查询优化等查询原理',
+      icon: Brain,
+      path: '/elasticsearch/query',
+      available: false
     },
     {
       id: 'search-api',
@@ -44,14 +62,6 @@ const ElasticsearchIndex = () => {
       description: 'Query DSL、聚合查询、全文搜索等搜索功能',
       icon: Search,
       path: '/elasticsearch/search-api',
-      available: false
-    },
-    {
-      id: 'cluster-management',
-      title: '集群管理',
-      description: '集群监控、节点管理、索引管理最佳实践',
-      icon: Server,
-      path: '/elasticsearch/cluster-management',
       available: false
     },
     {
@@ -64,18 +74,10 @@ const ElasticsearchIndex = () => {
     },
     {
       id: 'monitoring',
-      title: '监控与运维',
+      title: '运维与监控',
       description: '集群健康检查、性能指标监控、告警配置',
       icon: BarChart3,
       path: '/elasticsearch/monitoring',
-      available: false
-    },
-    {
-      id: 'configuration',
-      title: '配置详解',
-      description: 'elasticsearch.yml 配置、JVM 调优、安全配置',
-      icon: Settings,
-      path: '/elasticsearch/configuration',
       available: false
     }
   ];
