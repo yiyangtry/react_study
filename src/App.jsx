@@ -9,6 +9,7 @@ import PrinciplesIndex from './pages/elasticsearch/principles/PrinciplesIndex';
 import ArchitectureHierarchy from './pages/elasticsearch/principles/ArchitectureHierarchy';
 import IndexPrinciples from './pages/elasticsearch/principles/IndexPrinciples';
 import Segment from './pages/elasticsearch/principles/Segment';
+import ShardSimulation from './pages/elasticsearch/principles/ShardSimulation';
 import RocketMQLayout from './components/RocketMQLayout';
 import RocketMQIndex from './pages/rocketmq/RocketMQIndex';
 
@@ -25,6 +26,7 @@ const App = () => {
           <Route path="principles/architecture-hierarchy" element={<ArchitectureHierarchy />} />
           <Route path="principles/index-principles" element={<IndexPrinciples />} />
           <Route path="principles/segment" element={<Segment />} />
+          <Route path="principles/shard-simulation" element={<ShardSimulation />} />
         </Route>
         <Route path="/rocketmq" element={<RocketMQLayout />}>
           <Route index element={<RocketMQIndex />} />

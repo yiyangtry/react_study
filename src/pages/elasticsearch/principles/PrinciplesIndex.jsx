@@ -39,6 +39,14 @@ const PrinciplesIndex = () => {
       available: true
     },
     {
+      id: 'shard-simulation',
+      title: 'ES 集群分片动态仿真',
+      description: '动态仿真 ES 集群分片的分布、迁移和负载均衡过程',
+      icon: Network,
+      path: '/elasticsearch/principles/shard-simulation',
+      available: true
+    },
+    {
       id: 'inverted-index',
       title: '倒排索引原理',
       description: '倒排索引的数据结构、构建过程和查询机制',

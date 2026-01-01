@@ -60,6 +60,11 @@ const ElasticsearchLayout = () => {
           icon: ZoomIn
         },
         {
+          path: '/elasticsearch/principles/shard-simulation',
+          label: 'ES 集群分片动态仿真',
+          icon: FileText
+        },
+        {
           path: '/elasticsearch/principles/index-principles',
           label: '索引原理',
           icon: Database
