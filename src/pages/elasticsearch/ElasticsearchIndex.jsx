@@ -27,7 +27,7 @@ const ElasticsearchIndex = () => {
     {
       id: 'index',
       title: '索引',
-      description: '索引创建、写入流程、生命周期管理等索引相关知识',
+      description: '索引操作、Segment 原理、倒排索引、存储机制等完整知识体系',
       icon: Database,
       path: '/elasticsearch/index',
       available: true
@@ -39,14 +39,6 @@ const ElasticsearchIndex = () => {
       icon: Layers,
       path: '/elasticsearch/shard',
       available: false
-    },
-    {
-      id: 'segment',
-      title: '段',
-      description: 'Segment 原理、倒排索引、存储机制等底层存储知识',
-      icon: FileText,
-      path: '/elasticsearch/segment',
-      available: true
     },
     {
       id: 'query',

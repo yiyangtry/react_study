@@ -34,9 +34,6 @@ const ElasticsearchLayout = () => {
     if (pathname.startsWith('/elasticsearch/shard')) {
       expanded.shard = true;
     }
-    if (pathname.startsWith('/elasticsearch/segment')) {
-      expanded.segment = true;
-    }
     if (pathname.startsWith('/elasticsearch/query')) {
       expanded.query = true;
     }
@@ -96,14 +93,19 @@ const ElasticsearchLayout = () => {
       disabled: false,
       children: [
         {
-          path: '/elasticsearch/index/inverted-index',
-          label: '倒排索引',
-          icon: Search
-        },
-        {
           path: '/elasticsearch/index/write-flow',
           label: '索引写入流程',
           icon: FileText
+        },
+        {
+          path: '/elasticsearch/index/segment',
+          label: 'Segment 原理',
+          icon: FileText
+        },
+        {
+          path: '/elasticsearch/index/inverted-index',
+          label: '倒排索引',
+          icon: Search
         }
       ]
     },
@@ -113,19 +115,6 @@ const ElasticsearchLayout = () => {
       icon: Layers,
       disabled: true,
       children: []
-    },
-    { 
-      path: '/elasticsearch/segment', 
-      label: '段', 
-      icon: FileText,
-      disabled: false,
-      children: [
-        {
-          path: '/elasticsearch/segment/principles',
-          label: 'Segment 原理',
-          icon: FileText
-        }
-      ]
     },
     { 
       path: '/elasticsearch/query', 

@@ -7,27 +7,12 @@ import {
   Settings,
   ArrowRight,
   BookOpen,
-  Search
+  Search,
+  Layers
 } from 'lucide-react';
 
 const IndexIndex = () => {
   const topics = [
-    {
-      id: 'inverted-index',
-      title: '倒排索引',
-      description: '倒排索引介绍',
-      icon: Search,
-      path: '/elasticsearch/index/inverted-index',
-      available: true
-    },
-    {
-      id: 'write-flow',
-      title: '索引写入流程',
-      description: '深入理解文档从写入请求到持久化存储的完整流程',
-      icon: FileText,
-      path: '/elasticsearch/index/write-flow',
-      available: true
-    },
     {
       id: 'basic-concepts',
       title: '索引基础概念',
@@ -42,6 +27,46 @@ const IndexIndex = () => {
       description: '索引创建、更新、删除、别名管理等操作',
       icon: Settings,
       path: '/elasticsearch/index/create-management',
+      available: false
+    },
+    {
+      id: 'write-flow',
+      title: '索引写入流程',
+      description: '深入理解文档从写入请求到持久化存储的完整流程',
+      icon: FileText,
+      path: '/elasticsearch/index/write-flow',
+      available: true
+    },
+    {
+      id: 'segment',
+      title: 'Segment 原理',
+      description: '深入理解 Segment 的存储结构、创建机制和合并策略',
+      icon: FileText,
+      path: '/elasticsearch/index/segment',
+      available: true
+    },
+    {
+      id: 'inverted-index',
+      title: '倒排索引',
+      description: '倒排索引的数据结构、构建过程和查询机制',
+      icon: Search,
+      path: '/elasticsearch/index/inverted-index',
+      available: true
+    },
+    {
+      id: 'merge-strategy',
+      title: 'Segment 合并策略',
+      description: '理解 Segment 合并的触发条件、合并策略和优化方法',
+      icon: Layers,
+      path: '/elasticsearch/index/merge-strategy',
+      available: false
+    },
+    {
+      id: 'storage-mechanism',
+      title: '存储机制',
+      description: 'Translog、Refresh、Flush 等存储机制详解',
+      icon: Database,
+      path: '/elasticsearch/index/storage-mechanism',
       available: false
     },
     {
@@ -74,7 +99,7 @@ const IndexIndex = () => {
                 索引（Index）
               </h1>
               <p className="text-lg text-gray-600">
-                深入理解 Elasticsearch 索引的创建、管理和数据写入流程
+                深入理解 Elasticsearch 索引的创建、管理、写入流程和底层存储原理
               </p>
             </div>
           </div>
@@ -86,6 +111,7 @@ const IndexIndex = () => {
           <p className="text-gray-700 leading-relaxed mb-4">
             索引是 Elasticsearch 中存储相关文档的集合。每个索引都有自己的映射（Mapping）和设置（Settings）。
             理解索引的工作原理，能够帮助我们更好地设计数据结构、优化写入性能和管理索引生命周期。
+            从索引的使用到 Segment 的底层实现，从倒排索引的数据结构到存储机制，这里将带你全面理解索引的完整知识体系。
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             <div className="bg-blue-50 p-4 rounded-lg">
@@ -170,8 +196,8 @@ const IndexIndex = () => {
                 2
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 mb-1">索引写入流程</h4>
-                <p className="text-sm text-gray-600">深入理解文档写入的完整流程</p>
+                <h4 className="font-semibold text-gray-900 mb-1">索引创建与管理</h4>
+                <p className="text-sm text-gray-600">掌握索引的创建、更新、删除等操作</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
@@ -179,8 +205,26 @@ const IndexIndex = () => {
                 3
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900 mb-1">索引创建与管理</h4>
-                <p className="text-sm text-gray-600">掌握索引的创建、更新、删除等操作</p>
+                <h4 className="font-semibold text-gray-900 mb-1">索引写入流程</h4>
+                <p className="text-sm text-gray-600">深入理解文档写入的完整流程</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
+                4
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">Segment 原理</h4>
+                <p className="text-sm text-gray-600">理解索引的底层存储单元 Segment</p>
+              </div>
+            </div>
+            <div className="flex items-start space-x-3">
+              <div className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
+                5
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">倒排索引</h4>
+                <p className="text-sm text-gray-600">理解 Elasticsearch 的核心数据结构</p>
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Activity, Database } from 'lucide-react';
-import NodeCard from '../../components/NodeCard';
+import NodeCard from '../../../components/NodeCard';
 
 const ShardDistribution = () => {
   const data = [
