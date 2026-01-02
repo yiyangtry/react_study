@@ -12,6 +12,7 @@ import Segment from './pages/elasticsearch/principles/Segment';
 import ShardSimulation from './pages/elasticsearch/principles/ShardSimulation';
 import ClusterIndex from './pages/elasticsearch/cluster/ClusterIndex';
 import IndexIndex from './pages/elasticsearch/index/IndexIndex';
+import InvertedIndex from './pages/elasticsearch/index/InvertedIndex';
 import SegmentIndex from './pages/elasticsearch/segment/SegmentIndex';
 import RocketMQLayout from './components/RocketMQLayout';
 import RocketMQIndex from './pages/rocketmq/RocketMQIndex';
@@ -31,6 +32,7 @@ const App = () => {
           {/* 索引相关路由 */}
           <Route path="index" element={<IndexIndex />} />
           <Route path="index/write-flow" element={<IndexPrinciples />} />
+          <Route path="index/inverted-index" element={<InvertedIndex />} />
           {/* 段相关路由 */}
           <Route path="segment" element={<SegmentIndex />} />
           <Route path="segment/principles" element={<Segment />} />

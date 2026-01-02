@@ -96,6 +96,11 @@ const ElasticsearchLayout = () => {
       disabled: false,
       children: [
         {
+          path: '/elasticsearch/index/inverted-index',
+          label: '倒排索引',
+          icon: Search
+        },
+        {
           path: '/elasticsearch/index/write-flow',
           label: '索引写入流程',
           icon: FileText

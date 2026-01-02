@@ -6,11 +6,20 @@ import {
   RefreshCw,
   Settings,
   ArrowRight,
-  BookOpen
+  BookOpen,
+  Search
 } from 'lucide-react';
 
 const IndexIndex = () => {
   const topics = [
+    {
+      id: 'inverted-index',
+      title: '倒排索引',
+      description: '倒排索引介绍',
+      icon: Search,
+      path: '/elasticsearch/index/inverted-index',
+      available: true
+    },
     {
       id: 'write-flow',
       title: '索引写入流程',
